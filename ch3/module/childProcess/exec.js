@@ -1,5 +1,6 @@
 const {exec} = require('child_process');
 
+// const process = exec('python test.py');
 const process = exec('cmd /c chcp 65001>nul && dir');
 
  process.stdout.on('data',(data)=>{
