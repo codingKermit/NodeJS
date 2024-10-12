@@ -10,8 +10,9 @@
   "author": "codingKermit",
   "license": "ISC",
   "dependencies": {
-    "cookie-parser": "^1.4.6",
+    "cookie-parser": "^1.4.7",
     "express": "^4.21.0",
+    "express-session": "^1.18.1",
     "express-sesssion": "^1.15.5",
     "morgan": "^1.10.0"
   },

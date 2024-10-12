@@ -3,6 +3,7 @@ const path = require('path'); // 경로 관리를 위한 모듈 path 도 받습�
 const morgan = require('morgan');
 const cookieParser = require('cookie-parser')
 const {urlencoded} = require("express");
+const session = require('express-session');
 
 const app = express(); // express application을 생성합니다.
 
@@ -28,6 +29,31 @@ app.use(express.json());
 - extended false -> queryString 모듈 사용
 */
 app.use(urlencoded({ extended: true }));
+
+
+/*
+express의 static 모듈을 사용하면
+정적 파일을 제공할 때 실제 경로와 요청 경로를 상이하게 할 수 있습니다.
+예시) app.use('/',express.static(__dirname+'public')); 를 설정했을 경우
+
+요청 경로 : express/index.html
+실제 경로 : express/public/index.html
+* */
+app.use('/',express.static(__dirname+'/public'));
+
+
+app.use(session({
+    resave: false,
+    saveUninitialized: false,
+    secret: 'secret', // 보통은 env 를 통해 관리하지만 임의로 문자열 사용
+    cookie:{
+        httpOnly: true,
+        maxAge: 24 * 60 * 60 * 1000 // 1일
+    }
+}));
+
+
+/********************************** 미들웨어 모듈 설정 종료 **********************************************/
 
 /* use()는 미들웨어를 장착하는 함수로써 세번째 인자인 next를 필수로 사용해야합니다.
  * next()를 사용하지 않으면 다음으로 넘어가지 않아 미들웨어까지의 동작만 하고 멈추게 됩니다.
@@ -62,16 +88,12 @@ app.get('/setCookie',(req,res)=>{
      *  키,값,옵션 순서의 인수를 가집니다
      * 이 쿠키에는 서명을 붙이지 않았습니다
     */
-    res.cookie('name','존!!!시나!!!',{
+    res.cookie('name','이름',{
         httpOnly:true,
-        expires : new Date(Date.now()+10000),
-        path : '/'
     });
 
-    res.cookie('age','히미츠',{
+    res.cookie('age','나이',{
         httpOnly:true,
-        expires : new Date(Date.now()+10000),
-        path:'/',
         signed : true
     })
 
@@ -86,13 +108,32 @@ app.get('/getCookie',(req,res)=>{
     res.send(`name : ${req.cookies.name}<br> age : ${req.signedCookies.age}`);
 })
 
-app.get('/clearCookie',(req,res)=>{
-    res.clearCookie();
+app.get('/clearCookie/:key',(req,res)=>{
 
-    res.send('쿠키가 삭제되었습니다');
+    res.clearCookie(req.params.key,{signed:false});
+
+    res.send(`${req.params.key} (이)가 삭제되었습니다`);
+})
+
+app.get('/setSession',(req,res)=>{
+    req.session.username = 'username';
+    req.session.name = 'name';
+    res.send('세션이 초기화 되었습니다');
+})
+app.get('/getSession',(req,res)=>{
+    console.log(req.session);
+    res.send(req.sessionID);
 })
 
 app.get('/',(req,res)=>{ // GET 방식의 / 에 대한 응답을 설정합니다.
+
+    // 세션 초기화
+    req.session.id = 'hello';
+
+    console.log('req.session :',req.session);
+    // 요청자에 대한 세션의 id의 값을 hello로 설정함. 이는 모든 사용자에 대한 것이 아닌 해당 사용자에 한함.
+    req.session.id = 'hello';
+    console.log('req.session.id :',req.session.id);
 
 	/*
 	 * html 파일을 제공할 경우 sendFile() 을 사용합니다.
