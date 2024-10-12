@@ -23,8 +23,10 @@ app.use(cookieParser('secret'));
 // json 데이터를 파싱할 때 사용
 app.use(express.json());
 
-// form 데이터를 파싱할 때 사용
-// extended true -> qs 모듈 사용, extended false -> queryString 모듈 사용
+/*  form 데이터를 파싱할 때 사용
+- extended true -> qs 모듈 사용,
+- extended false -> queryString 모듈 사용
+*/
 app.use(urlencoded({ extended: true }));
 
 /* use()는 미들웨어를 장착하는 함수로써 세번째 인자인 next를 필수로 사용해야합니다.
@@ -54,7 +56,7 @@ app.use('/about',(req,res,next)=>{
 
 })
 
-app.get('/setCookie',(req,res,next)=>{
+app.get('/setCookie',(req,res)=>{
     /*
      *  쿠키를 저장합니다.
      *  키,값,옵션 순서의 인수를 가집니다
@@ -76,7 +78,7 @@ app.get('/setCookie',(req,res,next)=>{
     res.send('쿠키가 설정되었습니다')
 })
 
-app.get('/getCookie',(req,res,next)=>{
+app.get('/getCookie',(req,res)=>{
     console.log('Cookies : ',req.cookies); // cookie-parser 모듈에 의해 쿠키 정보가 정리되어 나옵니다
 
     console.log('Signed Cookies :',req.signedCookies); // 서명이 붙은 쿠키 정보를 가져옵니다.
@@ -84,35 +86,36 @@ app.get('/getCookie',(req,res,next)=>{
     res.send(`name : ${req.cookies.name}<br> age : ${req.signedCookies.age}`);
 })
 
-app.get('/clearCookie',(req,res,next)=>{
+app.get('/clearCookie',(req,res)=>{
     res.clearCookie();
 
     res.send('쿠키가 삭제되었습니다');
 })
 
-app.get('/',(req,res,next)=>{ // GET 방식의 / 에 대한 응답을 설정합니다.
-
-
-
-
-
+app.get('/',(req,res)=>{ // GET 방식의 / 에 대한 응답을 설정합니다.
 
 	/*
 	 * html 파일을 제공할 경우 sendFile() 을 사용합니다.
-	 * 이 때 내부적으로는 fs 모듈의 기능을 사용합니다.
+	 * sendFile() 은 내부적으로 fs 모듈의 기능을 사용합니다.
 	*/
     res.sendFile(path.join(__dirname,'index.html'));
 
     /*
-     * next의 사용 방법 중 특수한 경우가 인수로 'route' 라는 문자열을 전달하는 경우
+     * next() 의 사용 방법 중 특수한 경우가 인수로 'route' 라는 문자열을 전달하는 경우
      * 현재의 예시처럼 / 로 연결되는 라우터가 2개 있는 상황일 때 
      * next('route') 는 다음의 미들웨어로 가는 것이 아니라 다음 라우터를 찾아서 이동하게 됩니다
     */
-   // if(true){
-   //  next('route') // 다음 라우터를 찾아갑니다
-   // }else{
-   //  next(); // 다음 미들웨어로 갑니다
-   // }
+
+    /*
+    // 이 경우 제가 들었던 의문으로 sendFile()을 했는데 또 next()를 하려고 하기 때문에 에러가 발생할거라 생각했습니다.
+    // 하지만 에러가 발생하지 않는 이유를 알아보니 next('route')는 다음 라우트로 작업을 이전하기 때문에
+    // 해당 라우트에서는
+    if(true){
+     next('route') // 다음 라우터를 찾아갑니다
+    }else{
+     next(); // 다음 미들웨어로 갑니다
+    }
+    */
 }, (req,res)=>{
     console.log('next() 했으면 여기로 올겁니다');
 })
