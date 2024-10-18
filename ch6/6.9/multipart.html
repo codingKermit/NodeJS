@@ -1,0 +1,28 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Multipart</title>
+    <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
+    <script>
+        document.getElementById('exam').addEventListener('submit',(e)=>{
+            e.preventDefault();
+            const formData = new FormData();
+            formData.append('image',e.target.files[0]);
+            formData.append('title',e.target.value);
+            axios.post('/upload',formData);
+        })
+    </script>
+</head>
+<body>
+    <form id="exam" action="/upload" method="post" enctype="multipart/form-data">
+        <div>
+            <input type="file" name="image">
+            <label>
+                <input type="text" name="title"/>
+            </label>
+        </div>
+        <button type="submit">submit</button>
+    </form>
+</body>
+</html>
