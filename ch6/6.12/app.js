@@ -4,19 +4,23 @@ const cookieParser = require('cookie-parser')
 const {urlencoded} = require("express");
 const session = require('express-session');
 const dotenv = require('dotenv');
+const path = require('path');
+const nunjucks = require('nunjucks');
 
 dotenv.config();
 
 const indexRouter = require('./routes');
 const userRouter = require('./routes/user');
 
-
-
 const app = express(); // express application을 생성합니다.
 
-
-
 app.set('port',process.env.PORT | 3000); // 포트를 설정합니다
+app.set('view engine','html');
+
+nunjucks.configure('views',{
+    express:app,
+    watch:true
+})
 
 // morgan은 전달된 인수에 따라 로그 형식이 달라집니다
 app.use(morgan('dev'));
