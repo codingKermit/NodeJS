@@ -1,6 +1,7 @@
 const User = require("../models/user");
 const bcrypt = require('bcrypt');
 const passport = require('passport');
+const userCache = require('../passport/cache');
 
 exports.join = async (req,res,next) => {
     const {nickname, email, password} = req.body;
@@ -97,6 +98,9 @@ exports.update = async (req,res,next) => {
     })
     .then(async (result)=>{
         console.log('result',result);
+
+        // 회원정보 변경 시 캐싱 제거
+        delete userCache[id];
         req.logout(()=>{
             res.redirect('/');
         });

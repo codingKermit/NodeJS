@@ -5,8 +5,8 @@ const router = express.Router();
 
 router.use((req,res,next)=>{
     res.locals.user = req.user;
-    res.locals.followerCount = req.user?.Followers.length || 0;
-    res.locals.followingCount = req.user?.Followings.length || 0;
+    res.locals.followerCount = req.user?.Followers?.length || 0;
+    res.locals.followingCount = req.user?.Followings?.length || 0;
     res.locals.followingIdList = req.user?.Followings.map(f => f.id) || [];
 
     // res.locals 에 저장한 값은 이번 요청에 대해서만 값을 보존
