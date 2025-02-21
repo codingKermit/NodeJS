@@ -58,6 +58,7 @@ exports.logout = async (req,res,next) => {
     
     const accessToken = req.session.passport.user?.accessToken;
 
+    console.log('accessToken',accessToken);
     if(accessToken){
         await fetch('https://kapi.kakao.com/v1/user/logout',{
             method:'POST',
@@ -79,5 +80,29 @@ exports.logout = async (req,res,next) => {
 
     req.logout(()=>{
         res.redirect('/');
+    })
+}
+
+exports.update = async (req,res,next) => {
+    console.log('nickname : ' , req.body.nickname);
+
+    const id = req.user.id;
+
+    const user = await User.findOne({where:{id}});
+
+    const nickname = req.body.nickname;
+
+    await user.update({
+        nickname
+    })
+    .then(async (result)=>{
+        console.log('result',result);
+        req.logout(()=>{
+            res.redirect('/');
+        });
+    })
+    .catch((err)=>{
+        console.error(err);
+        next(err);
     })
 }

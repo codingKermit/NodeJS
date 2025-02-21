@@ -8,7 +8,7 @@ class User extends Sequelize.Model {
                 allowNull:true,
                 unique:true
             },
-            nick:{
+            nickname:{
                 type:Sequelize.STRING(15),
                 allowNull:false,
             },
@@ -41,7 +41,7 @@ class User extends Sequelize.Model {
         db.User.hasMany(db.Post);
         db.User.belongsToMany(db.User,{ // 팔로워 -> 나를 팔로우 하는 사람
             foreignKey : 'followingId', // 팔로우 당하는 사람
-            as : 'Follwers', // 팔로우 하는 사람들
+            as : 'Followers', // 팔로우 하는 사람들
             through : 'Follow'
         });
         db.User.belongsToMany(db.User,{ // 팔로잉 -> 내가 팔로우 하는 사람
@@ -49,6 +49,10 @@ class User extends Sequelize.Model {
             as : 'Followings', // 팔로우 당하는 사람 
             through:'Follow'
         }); 
+        db.User.belongsToMany(db.Post,{ // 게시글 좋아요
+            through : 'TwitLike',
+            as : 'Twit'
+        })
     }
 }
 

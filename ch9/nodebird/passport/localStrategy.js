@@ -21,7 +21,7 @@ module.exports = () => {
                     done(null, false, {message:'비밀번호 불일치'})
                 }
             } else {
-                connect(null, false, {message:'미가입 회원'})
+                done(null, false, {message:'미가입 회원'})
             }
         } catch (error) {
             console.error(error);

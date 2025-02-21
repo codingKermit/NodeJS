@@ -14,6 +14,8 @@ dotenv.config();
 
 const pageRouter = require('./routes/page');
 const authRouter = require('./routes/auth');
+const postRouter = require('./routes/post');
+const userRouter = require('./routes/user');
 
 const app = express();
 passportConfig();
@@ -35,8 +37,13 @@ sequelize.sync({force:false})
 
 app.use(morgan('dev'));
 app.use(express.static(path.join(__dirname,'public')));
-app.use(express.json());
-app.use(express.urlencoded({extended:false}));
+
+/* app.use() 첫 번째 파라미터 -> 적용할 url, 두 번째 파라미터 -> 적용할 미들웨어
+코드 해석 : /img 경로는 express.static 을 사용하여 정적 콘텐츠 접근을 허용
+*/
+app.use('/img',express.static(path.join(__dirname,'uploads')));
+app.use(express.json()); // ajax json 요청을 req.body 에 저장
+app.use(express.urlencoded({extended:false})); // formData 를 req.body 에 저장
 app.use(cookieParser(process.env.COOKIE_SECRET));
 app.use(session({
     resave:false,
@@ -47,12 +54,18 @@ app.use(session({
         secure:false
     }
 }))
-// session 설정 이후에 passport 사용 설정
+
+/**
+ * session 설정 이후에 passport 사용 설정
+ * 라우터보다는 먼저 사용되어야함.
+ */
 app.use(passport.initialize()); // req.user, req.login, req.logout req.isAuthticate 함수 생성
 app.use(passport.session()); // connect.sid 이름으로 세션 쿠키를 클라이언트로 전달
 
 app.use('/',pageRouter);
 app.use('/auth',authRouter);
+app.use('/post',postRouter);
+app.use('/user',userRouter);
 
 app.use((req,res,next)=>{
     const error = new Error(`${req.method} ${req.url} 라우터가 없습니다.`);
