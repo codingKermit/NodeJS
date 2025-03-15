@@ -85,7 +85,7 @@
       tag.addEventListener('click', function() {
         const myId = document.querySelector('#my-id');
         if (myId) {
-          const userId = tag.parentNode.querySelector('.twit-user-id').value;
+          const userId = tag.parentNode.parentNode.querySelector('.twit-user-id').value;
           if (userId !== myId.value) {
             if (confirm('팔로잉하시겠습니까?')) {
               axios.post(`/user/${userId}/follow`)
@@ -105,7 +105,7 @@
       tag.addEventListener('click', function() {
         const myId = document.querySelector('#my-id');
         if (myId) {
-          const userId = tag.parentNode.querySelector('.twit-user-id').value;
+          const userId = tag.parentNode.parentNode.querySelector('.twit-user-id').value;
           if (userId !== myId.value) {
             if (confirm('언팔로우하시겠습니까?')) {
               axios.post(`/user/${userId}/unfollow`)
@@ -125,7 +125,7 @@
       tag.addEventListener('click', function() {
         const myId = document.querySelector('#my-id');
         if (myId) {
-          const postId = tag.parentNode.querySelector('.twit-like').value;
+          const postId = tag.parentNode.parentNode.querySelector('.twit-like').value;
               axios.post(`/post/like/${postId}`)
                 .then(() => {
                   location.reload();
@@ -141,7 +141,7 @@
       tag.addEventListener('click', function() {
         const myId = document.querySelector('#my-id');
         if (myId) {
-          const postId = tag.parentNode.querySelector('.twit-unlike').value;
+          const postId = tag.parentNode.parentNode.querySelector('.twit-unlike').value;
               axios.post(`/post/unlike/${postId}`)
                 .then(() => {
                   location.reload();
@@ -159,7 +159,7 @@
         if (myId) {
           const userId = tag.parentNode.parentNode.querySelector('.twit-user-id').value;
           if (userId == myId.value) {
-            const postId = tag.parentNode.querySelector('.delete').value;
+            const postId = tag.parentNode.parentNode.querySelector('.delete').value;
             if (confirm('게시글을 삭제하시겠습니까?')) {
               axios.post(`/post/delete/${postId}`)
                 .then(() => {

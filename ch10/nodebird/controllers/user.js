@@ -1,4 +1,5 @@
 const User = require('../models/user');
+const userCache = require('../passport/cache');
 
 exports.follow = async (req,res,next) => {
 
@@ -12,6 +13,7 @@ exports.follow = async (req,res,next) => {
         
         if(user){
             await user.addFollowing(parseInt(req.params.id,10));
+            delete userCache[id];
             res.send('success');
         } else {
             res.status(404).send('no user');
@@ -41,6 +43,7 @@ exports.unfollow = async (req,res,next) => {
             user.removeFollowings(unfollowId)
             .then((result)=>{
                 console.log('result : ',result);
+                delete userCache[id];
                 res.send('success');
             })
             .catch((err)=>{

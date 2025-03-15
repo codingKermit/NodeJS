@@ -2,6 +2,7 @@ const Post = require('../models/post');
 const HashTag = require('../models/hashtag');
 const multer = require('multer');
 const User = require('../models/user');
+const userCache = require('../passport/cache');
 
 exports.afterUploadImage = (req,res)=>{
     console.log(req.file);
@@ -69,6 +70,7 @@ exports.like = async (req,res,next) =>{
     await user.addTwit(postId)
     .then((result)=>{
         console.log('follow result : ',result);
+        delete userCache[id];
         res.send(true);
     })
     .catch((error)=>{
@@ -90,6 +92,7 @@ exports.unlike = async (req,res,next) =>{
     await user.removeTwit(postId)
     .then((result)=>{
         console.log('unfollow result : ',result);
+        delete userCache[id];
         res.send(true);
     })
     .catch((err)=>{
