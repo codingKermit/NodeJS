@@ -23,6 +23,12 @@
             <input type="radio" id="type-premium" name="type" value="premium">
           </div>
           <div>
+            <label for="client-secret">클라이언트용</label>
+            <input type="radio" id="client-secret" name="secret-type" value="client">
+            <label for="server-secret">서버용</label>
+            <input type="radio" id="server-secret" name="secret-type" value="server">
+          </div>
+          <div>
             <label for="host">도메인</label>
             <input type="text" id="host" name="host" placeholder="ex) zerocho.com">
           </div>
@@ -34,12 +40,14 @@
           <th>도메인 주소</th>
           <th>타입</th>
           <th>클라이언트 비밀키</th>
+          <th>서버 비밀키</th>
         </tr>
         {% for domain in domains %}
           <tr>
             <td>{{domain.host}}</td>
             <td>{{domain.type}}</td>
             <td>{{domain.clientSecret}}</td>
+            <td>{{domain.serverSecret}}</td>
           </tr>
         {% endfor %}
       </table>

@@ -32,18 +32,30 @@ exports.renderLogin = async (req,res,next)=>{
 
 exports.createDomain = async (req,res,next) =>{
     const id = req.user.id;
-    await Domain.create({
-        UserId:req.user.id,
-        host:req.body.host,
-        type:req.body.type,
-        clientSecret : uuid.v7() // 강의에서는 v4를 사용하지만 인덱싱을 위해 v7을 사용
-    })
-    .then((result)=>{
-        console.log('도메인 등록 결과 : ', result);
-        res.redirect('/');
-    })
-    .catch((err)=>{
-        console.error(err);
-        next(err);
-    })
+
+    const secretType = req.body['secret-type'];
+
+    try {
+        if(['client','server'].includes(secretType)){
+            await Domain.create({
+                UserId:id,
+                host:req.body.host,
+                type:req.body.type,
+                [`${secretType}Secret`] : uuid.v7() // 강의에서는 v4를 사용하지만 인덱싱을 위해 v7을 사용
+            })
+            .then((result)=>{
+                console.log('도메인 등록 결과 : ', result);
+                res.redirect('/');
+            })
+            .catch((err)=>{
+                console.error(err);
+                next(err);
+            })
+        } else {
+            throw new Error('정의 되지 않은 비밀키 타입');
+        }    
+    } catch (error) {
+        console.error(error);
+        next(error);
+    }
 }

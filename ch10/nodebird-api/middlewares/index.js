@@ -3,6 +3,7 @@ const rateLimit = require('express-rate-limit');
 const User = require('../models/user');
 const cors = require('cors');
 const Domain = require('../models/domain');
+const { Op } = require('sequelize');
 
 exports.isLoggedIn = (req,res,next) =>{
 
@@ -25,15 +26,9 @@ exports.isNotLoggedIn = (req,res,next) => {
 exports.verifyToken = async (req,res,next) =>{
     try {
         const token = req.headers.authorization;
-
-        // console.log('headers : ',req.headers);
-
-        console.log('token : ',token);
-
         res.locals.decoded = jwt.verify(token,process.env.JWT_SECRET);
         return next();
     } catch (error) {
-        console.log('error name : ',error.name);
         if(error.name == 'TokenExpiredError'){
             return res.status(419).json({
                 code : 419, // 세션 만료 STATUS 인데 강의에서는 임의로 토큰 만료 STATUS로 사용
@@ -49,34 +44,49 @@ exports.verifyToken = async (req,res,next) =>{
 };
 
 exports.apiLimiter = async (req,res,next) => {
-    console.log('decoded: ',res.locals.decoded);
-    
+
     const id = res.locals.decoded?.id ?? null;
-    const clientSecret = res.locals.decoded?.clientSecret ?? null;
+    
+    const secretKey = req.headers.secretkey ?? null;
+
     const user = await User.findOne({
         where:{id},
         include:{
             model:Domain,
-            attributes:['type','host'],
-            where:{clientSecret}
+            attributes:['type','host','serverSecret'],
+            where:{[Op.or]:[{clientSecret:secretKey},{serverSecret:secretKey}]}
         }
     });
 
-    console.log('domain length',user?.Domains.length);
+    const type = user?.Domains[0].type;
 
-    rateLimit({
-        windowMs:60*1000,
-        max:10,
-        handler(req,res){
-            console.log('req : ',req);
-    
-            res.status(this.statusCode).json({
-                code:this.statusCode,
-                message:'1분에 10 번만 요청할 수 있습니다.'
-            });
-        }
-    })(req,res,next);
-} 
+    const serverClient = user?.Domains[0].serverSecret ? 'server' : 'client';
+
+    const method = req.method;
+
+    if(serverClient == 'client' && method != 'GET'){
+        const error = new Error('클라이언트 비밀키는 GET 요청만 가능합니다.');
+        error.status = 403;
+        return next(error);
+    }
+
+    const max = type == 'premium' ? 100 : 3;
+
+    res.locals.max = max;
+
+    rateLimiter(req,res,next);
+}
+
+const rateLimiter = rateLimit({
+    windowMs:60*1000,
+    max:(req,res)=>res.locals.max,
+    handler(req,res){
+        res.status(this.statusCode).json({
+            code:this.statusCode,
+            message:`1분에 ${res.locals.max} 번만 요청할 수 있습니다.`
+        });
+    }
+})
 
 exports.deprecated = (req,res) => {
     res.status(410).json({

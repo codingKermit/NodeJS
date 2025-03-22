@@ -14,8 +14,9 @@ const cors = require('cors');
 
 router.use(corsDomain);
 
-router.post('/token',apiLimiter,createToken);
-router.get('/test',apiLimiter, verifyToken,tokenTest);
+// POST, GET 요청을 모두 받도록 하기 위해 all 로 수정
+router.all('/token', apiLimiter, createToken);
+router.get('/test', verifyToken, apiLimiter,tokenTest);
 
 router.get('/posts/my',verifyToken,apiLimiter,getMyPosts);
 router.get('/posts/hashtag/:title',verifyToken,apiLimiter,getPostsByHashtag);

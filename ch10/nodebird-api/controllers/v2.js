@@ -3,14 +3,20 @@ const User = require('../models/user');
 const Domain = require('../models/domain');
 const Post = require('../models/post');
 const Hashtag = require('../models/hashtag');
+const { Op } = require('sequelize');
 
 exports.createToken = async (req,res,next) => {
-    const {clientSecret} = req.body;
+    let secretKey = null;
 
-    console.log('clientSecret : ', clientSecret);
+    if(req.method === 'GET'){
+        secretKey = req.query.secretKey ?? null;
+    } else {
+        secretKey = req.body.secretKey ?? null;
+    }
+
     try {
         const domain = await Domain.findOne({
-            where:{clientSecret},
+            where:{[Op.or]:[{clientSecret:secretKey},{serverSecret:secretKey}]},
             include:[
                 {
                     model:User,
@@ -28,8 +34,7 @@ exports.createToken = async (req,res,next) => {
 
         const token = jwt.sign({
             id : domain.User.id,
-            nickname : domain.User.nickname,
-            clientSecret
+            nickname : domain.User.nickname
         },process.env.JWT_SECRET,{
             expiresIn:'10m',
             issuer:'nodebird'
@@ -55,10 +60,8 @@ exports.tokenTest = async (req,res,next) => {
 };
 
 exports.getMyPosts = async (req,res,next) => {
-
+    
     const {id} = res.locals.decoded; // verifyToken 미들웨어에서 처리한 token 정보
-
-    console.log('id : ', id);
 
     // 방법1. async/await 사용
     try {
@@ -78,7 +81,6 @@ exports.getMyPosts = async (req,res,next) => {
     // 방법2. Promise 사용
     // Post.findAll({where:{UserId:id}})
     // .then((posts)=>{
-    //     console.log('posts : ', posts);
     //     return res.json({
     //         code : 200,
     //         payload:posts
@@ -94,8 +96,6 @@ exports.getMyPosts = async (req,res,next) => {
 
 exports.getPostsByHashtag = async (req,res,next) => {
     const title = req.params.title;
-
-    console.log('title : ', title);
 
     try {
         const hashtag = await Hashtag.findOne({where:{title}});

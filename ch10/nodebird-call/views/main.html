@@ -7,8 +7,14 @@
   <div id="result"></div>
   <script src="https://unpkg.com/axios/dist/axios.min.js"></script>
   <script>
-    axios.post('http://localhost:8002/v2/token', {
-      clientSecret: '{{key}}',
+    // 학습을 위해 클라이언트 비밀키는 GET요청만 허용
+    axios.get('http://localhost:8002/v2/token', {
+      params:{
+        secretKey: '{{key}}',
+      },
+      headers:{
+        secretKey: '{{key}}',
+      }
     })
       .then((res) => {
         document.querySelector('#result').textContent = JSON.stringify(res.data);
