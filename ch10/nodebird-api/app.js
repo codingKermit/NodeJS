@@ -9,6 +9,8 @@ const models = require('./models');
 const sequelize = models.sequelize;
 const passport = require('passport');
 const passportConfig = require('./passport');
+const swaggerUi = require('swagger-ui-express');
+const swaggerDocument = require('./swagger-output.json');
 
 dotenv.config();
 
@@ -62,6 +64,7 @@ app.use('/auth',authRouter);
 app.use('/',indexRouter);
 app.use('/v1',v1Router);
 app.use('/v2',v2Router);
+app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(swaggerDocument));
 
 app.use((req,res,next)=>{
     const error = new Error(`${req.method} ${req.url} 라우터가 없습니다.`);

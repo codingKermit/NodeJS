@@ -26,9 +26,11 @@ exports.isNotLoggedIn = (req,res,next) => {
 exports.verifyToken = async (req,res,next) =>{
     try {
         const token = req.headers.authorization;
+        console.log('token : ',token);
         res.locals.decoded = jwt.verify(token,process.env.JWT_SECRET);
         return next();
     } catch (error) {
+        console.error('error :', error);
         if(error.name == 'TokenExpiredError'){
             return res.status(419).json({
                 code : 419, // 세션 만료 STATUS 인데 강의에서는 임의로 토큰 만료 STATUS로 사용
@@ -45,9 +47,13 @@ exports.verifyToken = async (req,res,next) =>{
 
 exports.apiLimiter = async (req,res,next) => {
 
+    // console.log('decoded : ',res.locals.decoded)
+
     const id = res.locals.decoded?.id ?? null;
     
     const secretKey = req.headers.secretkey ?? null;
+
+    // console.log('id : ',id);
 
     const user = await User.findOne({
         where:{id},
@@ -58,19 +64,32 @@ exports.apiLimiter = async (req,res,next) => {
         }
     });
 
+    // if(!user){
+    //     const error = new Error('사용자를 찾을 수 없습니다');
+    //     error.status = 404;
+    //     return next(error);
+    // }
+
     const type = user?.Domains[0].type;
+
+    // console.log('secretKey : ',secretKey);
+    // console.log('domains[0] : ',user);
 
     const serverClient = user?.Domains[0].serverSecret ? 'server' : 'client';
 
     const method = req.method;
 
-    if(serverClient == 'client' && method != 'GET'){
+    if(user != null &&serverClient == 'client' && method != 'GET'){
         const error = new Error('클라이언트 비밀키는 GET 요청만 가능합니다.');
         error.status = 403;
         return next(error);
     }
 
-    const max = type == 'premium' ? 100 : 3;
+    // console.log('user : ',user?.Domains[0]);
+
+    console.log('type :', type);
+
+    const max = type == 'premium' ? 100 : 5;
 
     res.locals.max = max;
 
@@ -97,9 +116,8 @@ exports.deprecated = (req,res) => {
 
 exports.corsDomain = async (req,res,next) =>{
 
-    const origin = req.get('origin');
-
-    const host = new URL(req.get('origin')).host;
+    // const host = new URL(origin).host;
+    const host = req.get('host');
 
     // DB에 저장한 host의 값은 프로토콜을 제외한 값이기 때문에 URL 라이브러리 사용
     const domain = await Domain.findOne({where:{host}});

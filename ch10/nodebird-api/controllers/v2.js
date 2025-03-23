@@ -7,12 +7,13 @@ const { Op } = require('sequelize');
 
 exports.createToken = async (req,res,next) => {
     let secretKey = null;
-
+    
     if(req.method === 'GET'){
         secretKey = req.query.secretKey ?? null;
     } else {
         secretKey = req.body.secretKey ?? null;
     }
+    console.log('secretKey : ',secretKey);
 
     try {
         const domain = await Domain.findOne({
