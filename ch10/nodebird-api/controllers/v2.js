@@ -13,7 +13,13 @@ exports.createToken = async (req,res,next) => {
     } else {
         secretKey = req.body.secretKey ?? null;
     }
-    console.log('secretKey : ',secretKey);
+
+    if(!secretKey){
+        return res.status(400).json({
+            code:400,
+            message : "비밀키(secretKey)는 필수 값 입니다."
+        })
+    }
 
     try {
         const domain = await Domain.findOne({
@@ -25,6 +31,8 @@ exports.createToken = async (req,res,next) => {
                 }
             ]
         });
+
+        console.log('domain : ', domain);
 
         if(!domain){
             return res.status(401).json({

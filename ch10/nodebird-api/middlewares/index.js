@@ -25,7 +25,7 @@ exports.isNotLoggedIn = (req,res,next) => {
 
 exports.verifyToken = async (req,res,next) =>{
     try {
-        const token = req.headers.authorization;
+        const token = req.headers.authorization?.replace('Bearer ','');
         console.log('token : ',token);
         res.locals.decoded = jwt.verify(token,process.env.JWT_SECRET);
         return next();
@@ -47,13 +47,10 @@ exports.verifyToken = async (req,res,next) =>{
 
 exports.apiLimiter = async (req,res,next) => {
 
-    // console.log('decoded : ',res.locals.decoded)
 
     const id = res.locals.decoded?.id ?? null;
     
     const secretKey = req.headers.secretkey ?? null;
-
-    // console.log('id : ',id);
 
     const user = await User.findOne({
         where:{id},
@@ -64,16 +61,7 @@ exports.apiLimiter = async (req,res,next) => {
         }
     });
 
-    // if(!user){
-    //     const error = new Error('사용자를 찾을 수 없습니다');
-    //     error.status = 404;
-    //     return next(error);
-    // }
-
     const type = user?.Domains[0].type;
-
-    // console.log('secretKey : ',secretKey);
-    // console.log('domains[0] : ',user);
 
     const serverClient = user?.Domains[0].serverSecret ? 'server' : 'client';
 
@@ -84,10 +72,6 @@ exports.apiLimiter = async (req,res,next) => {
         error.status = 403;
         return next(error);
     }
-
-    // console.log('user : ',user?.Domains[0]);
-
-    console.log('type :', type);
 
     const max = type == 'premium' ? 100 : 5;
 

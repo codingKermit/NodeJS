@@ -1,22 +1,44 @@
-const swaggerAutogen = require('swagger-autogen')();
+const swaggerAutogen = require('swagger-autogen')({openapi: '3.0.0'});
 
 const doc = {
   info: {
-    title: 'My API',
-    description: 'Description'
+    version: '',            // by default: '1.0.0'
+    title: '',              // by default: 'REST API'
+    description: ''         // by default: ''
   },
-  host: 'localhost:8002/v2',
-  origin: 'http://localhost:8002',
-  securityDefinitions:{
-    jwt:{
-      type:'apiKey',
-      in:'header',
-      name:'Authorization'
+  servers: [
+    {
+      url: 'http://localhost:8002',              // by default: 'http://localhost:3000'
+      description: ''       // by default: ''
+    },
+    // { ... }
+  ],
+  tags: [                   // by default: empty Array
+    {
+      name: '',             // Tag name
+      description: ''       // Tag description
+    },
+    // { ... }
+  ],
+  components: {
+    securitySchemes:{
+        bearerAuth: {
+            type: 'http',
+            scheme: 'bearer'
+        }
+    },
+    schemas:{
+      secretKeySchema : {
+        $secretKey:'0195bda4-8eab-77a8-ab50-0cdefcb8d041'
+      }
     }
-  },
+  }           // by default: empty object
 };
 
 const outputFile = './swagger-output.json';
-const routes = ['./routes/v2.js'];
+const routes = ['./app.js'];
+
+/* NOTE: If you are using the express Router, you must pass in the 'routes' only the 
+root file where the route starts, such as index.js, app.js, routes.js, etc ... */
 
 swaggerAutogen(outputFile, routes, doc);
