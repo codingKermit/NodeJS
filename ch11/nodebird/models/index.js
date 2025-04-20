@@ -3,19 +3,23 @@
 const fs = require('fs');
 const path = require('path');
 const Sequelize = require('sequelize');
+const cls = require('cls-hooked');
 const process = require('process');
 const basename = path.basename(__filename);
 const env = process.env.NODE_ENV || 'development';
 const config = require(__dirname + '/../config/config.json')[env];
 const db = {};
+const namespace = cls.createNamespace('transaction-namespace');
 
 const sequelize = new Sequelize(
   config.database, config.username, config.password, config
 )
 
+Sequelize.useCLS(namespace);
+
 fs.readdirSync(__dirname)
 .filter( file => {
-  return file !== basename && file.indexOf('.') !== 0 && file.slice(-3) === '.js';
+  return file !== basename && !file.includes('test') && file.indexOf('.') !== 0 && file.slice(-3) === '.js';
 })
 .forEach(file => {
   const model = require(path.join(__dirname,file));
@@ -39,5 +43,6 @@ Object.keys(db).forEach(modelName => {
 // })
 
 db.sequelize = sequelize;
+db.namespace = namespace;
 
 module.exports = db;

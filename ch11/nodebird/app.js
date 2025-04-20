@@ -55,12 +55,14 @@ app.use(session({
     }
 }))
 
+
 /**
  * session 설정 이후에 passport 사용 설정
  * 라우터보다는 먼저 사용되어야함.
  */
 app.use(passport.initialize()); // req.user, req.login, req.logout req.isAuthticate 함수 생성
 app.use(passport.session()); // connect.sid 이름으로 세션 쿠키를 클라이언트로 전달
+
 
 app.use('/',pageRouter);
 app.use('/auth',authRouter);
@@ -80,6 +82,5 @@ app.use((err,req,res,next)=>{
     res.render('error');
 })
 
-app.listen(app.get('port'),()=>{
-    console.log(app.get('port'),'번 포트에서 대기 중');
-})
+
+module.exports = app;
