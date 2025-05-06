@@ -1,0 +1,47 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>GIF 채팅방</title>
+</head>
+<body>
+    <div>F12를 눌러 console 탭과 network 탭을 확인하세요</div>
+    <script>
+        const webSoket = new WebSocket('ws://localhost:8005');
+
+        webSoket.onopen = function(event) {
+            console.log('WebSocket 연결 성공!');
+            webSoket.send('안녕하세요!');
+        };
+
+        webSoket.onmessage = function(event) {
+            console.log('서버로부터 받은 메시지:', event.data);
+        };
+
+        webSoket.onclose = function(event) {
+            console.log('WebSocket 연결 종료됨!');
+        };
+
+        webSoket.onerror = function(event) {
+            console.error('WebSocket 오류 발생:', event);
+        };
+
+        webSoket.onclose = function(event) {
+            console.log('WebSocket 연결 종료됨!');
+        };
+
+        // 메시지 전송 예시
+        function sendMessage(message) {
+            if (webSoket.readyState === WebSocket.OPEN) {
+                webSoket.send(message);
+            } else {
+                console.error('WebSocket이 열려 있지 않습니다. 메시지를 전송할 수 없습니다.');
+            }
+        }
+        // 예시로 3초마다 메시지 전송
+        setInterval(() => {
+            sendMessage('3초마다 전송되는 메시지');
+        }, 3000);
+    </script>
+    </body>
+</html>
