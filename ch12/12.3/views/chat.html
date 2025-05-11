@@ -1,0 +1,162 @@
+{% extends 'layout.html' %}
+
+{% block content %}
+  <h1>{{title}}</h1>
+  <a href="/" id="exit-btn">방 나가기</a>
+  <fieldset>
+    <legend>채팅 내용</legend>
+    <div id="chat-list">
+      {% for chat in chats %}
+        {% if chat.user === user %}
+          <div class="mine" style="color: {{chat.user}}">
+            <div>{{chat.user}}</div>
+            {% if chat.gif %}}
+              <img src="/gif/{{chat.gif}}">
+            {% else %}
+              <div>{{chat.chat}}</div>
+            {% endif %}
+          </div>
+        {% elif chat.user === 'system' %}
+          <div class="system">
+            <div>{{chat.chat}}</div>
+          </div>
+        {% else %}
+          <div class="other" style="color: {{chat.user}}">
+            <div>{{chat.user}}</div>
+            {% if chat.gif %}
+              <img src="/gif/{{chat.gif}}">
+            {% else %}
+              <div>{{chat.chat}}</div>
+            {% endif %}
+          </div>
+        {% endif %}
+      {% endfor %}
+    </div>
+  </fieldset>
+  <form action="/chat" id="chat-form" method="post" enctype="multipart/form-data">
+    <label for="gif">GIF 올리기</label>
+    <input type="file" id="gif" name="gif" accept="image/gif">
+    <input type="text" id="chat" name="chat">
+    <button type="submit">전송</button>
+  </form>
+  <pre>현재 유저 수 : <b id="user-size"></b>명</pre>
+  <fieldset>
+    <legend>현재 접속 유저</legend>
+    <div id="user-list">
+    </div>
+  </fieldset>
+  <script src="https://unpkg.com/axios/dist/axios.min.js"></script>
+  <script src="/socket.io/socket.io.js"></script>
+  <script>
+    const socket = io.connect('http://localhost:8005/chat', {
+      path: '/socket.io',
+    });
+    socket.emit('join', new URL(location).pathname.split('/').at(-1));
+
+    // 채팅 목록 그리기
+    socket.on('join', function (data) {
+      console.log('data : ',data);
+      const div = document.createElement('div');
+      div.classList.add('system');
+      const chat = document.createElement('div');
+      chat.textContent = data.chat;
+      div.appendChild(chat);
+      document.querySelector('#chat-list').appendChild(div);
+    });
+    
+    // 사용자 목록 그리기
+    socket.on('join', function (data) {
+      const users = data.users;
+      document.querySelector('#user-size').textContent = users.length;
+      const ul = document.createElement('ul');
+      for(user of users){
+        console.log('user : ' , user);
+        const li = document.createElement('li');
+        li.style.color=user;
+        li.dataset.id=user;
+        li.textContent = user;
+        ul.appendChild(li);
+      }
+      document.querySelector('#user-list').replaceChildren(ul);
+    })
+
+    socket.on('exit', function (data) {
+      const div = document.createElement('div');
+      div.classList.add('system');
+      const chat = document.createElement('div');
+      chat.textContent = data.chat;
+      div.appendChild(chat);
+      document.querySelector('#chat-list').appendChild(div);
+      document.querySelector('#user-size').textContent = data.users.size;
+    });
+
+
+    socket.on('exit', function (data) {
+      const users = data.users;
+      document.querySelector('#user-size').textContent = users.length;
+      const ul = document.createElement('ul');
+      for(user of users){
+        console.log('user : ' , user);
+        const li = document.createElement('li');
+        li.style.color=user;
+        li.dataset.id=user;
+        li.textContent = user;
+        ul.appendChild(li);
+      }
+      document.querySelector('#user-list').replaceChildren(ul);
+    })
+
+    socket.on('removeRoom',(data)=>{
+      console.log('removeRoom data : ',data);
+    })
+    socket.on('chat', function (data) {
+      const div = document.createElement('div');
+      if (data.user === '{{user}}') {
+        div.classList.add('mine');
+      } else {
+        div.classList.add('other');
+      }
+      const name = document.createElement('div');
+      name.textContent = data.user;
+      div.appendChild(name);
+      if (data.chat) {
+        const chat = document.createElement('div');
+        chat.textContent = data.chat;
+        div.appendChild(chat);
+      } else {
+        const gif = document.createElement('img');
+        console.log('data : ',data);
+        gif.src = '/gif/' + data.gif;
+        div.appendChild(gif);
+      }
+      div.style.color = data.user;
+      document.querySelector('#chat-list').appendChild(div);
+    });
+    document.querySelector('#chat-form').addEventListener('submit', function (e) {
+      e.preventDefault();
+      if (e.target.chat.value) {
+        axios.post('/room/{{room._id}}/chat', {
+          chat: this.chat.value,
+        })
+          .then(() => {
+            e.target.chat.value = '';
+          })
+          .catch((err) => {
+            console.error(err);
+          });
+      }
+    });
+    document.querySelector('#gif').addEventListener('change', function (e) {
+      console.log(e.target.files);
+      const formData = new FormData();
+      formData.append('gif', e.target.files[0]);
+      axios.post('/room/{{room._id}}/gif', formData)
+        .then(() => {
+          e.target.file = null;
+        })
+        .catch((err) => {
+          console.error(err);
+        });
+    });
+  </script>
+{% endblock %}

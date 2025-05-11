@@ -6,7 +6,8 @@ const session = require('express-session');
 const nunjucks = require('nunjucks');
 const dotenv = require('dotenv');
 const pageRouter = require('./routes');
-
+const connect = require('./schemas');
+const ColorHash = require('color-hash').default;
 
 dotenv.config();
 
@@ -19,14 +20,17 @@ nunjucks.configure('views',{
     watch : true
 });
 
+connect();
+
 app.use(morgan('dev'));
 app.use(express.static(path.join(__dirname,'public')));
-
+app.use('/gif',express.static(__dirname+'/uploads'));
 app.use('/img',express.static(path.join(__dirname,'uploads')));
 app.use(express.json()); // ajax json 요청을 req.body 에 저장
 app.use(express.urlencoded({extended:false})); // formData 를 req.body 에 저장
 app.use(cookieParser(process.env.COOKIE_SECRET));
-app.use(session({
+
+const sessionMiddleware = session({
     resave:false,
     saveUninitialized:false,
     secret:process.env.COOKIE_SECRET,
@@ -34,7 +38,17 @@ app.use(session({
         httpOnly:true,
         secure:false
     }
-}));
+})
+
+app.use(sessionMiddleware);
+app.use((req,res,next)=>{
+    if(!req.session.color){
+        const colorHash = new ColorHash();
+        req.session.color = colorHash.hex(req.sessionID);
+        console.log(req.session.color, req.sessionID);
+    }
+    next();
+})
 
 app.use('/',pageRouter);
 
@@ -52,4 +66,4 @@ app.use((err,req,res,next)=>{
     res.render('error');
 });
 
-module.exports = app;
+module.exports = {app,sessionMiddleware};
