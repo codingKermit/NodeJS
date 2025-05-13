@@ -19,6 +19,10 @@ const roomSchema = new Schema({
     createdAt:{
         type:Date,
         default:Date.now,
+    },
+    isDm:{
+        type:Boolean,
+        default:false
     }
 });
 

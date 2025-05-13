@@ -158,5 +158,11 @@
           console.error(err);
         });
     });
+
+    document.querySelector('#user-list').addEventListener('click',(e)=>{
+      if(e.target.tagName == 'LI'){
+        console.log('id : ',e.target.dataset.id); 
+      }
+    })
   </script>
 {% endblock %}

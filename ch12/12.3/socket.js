@@ -8,6 +8,7 @@ module.exports = (server, app, sessionMiddleware)=>{
     app.set('io',io);
     const room = io.of('/room');
     const chat = io.of('/chat');
+    const dm = io.of('/dm');
 
     /**
      * 아래 구조의 코드를 한줄로 요약한 코드임
@@ -80,8 +81,6 @@ module.exports = (server, app, sessionMiddleware)=>{
                 user:'system',
                 chat:msg
             })
-
-
         })
     });
 }
