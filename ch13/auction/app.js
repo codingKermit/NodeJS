@@ -8,6 +8,7 @@ const nunjucks = require('nunjucks');
 const dotenv = require('dotenv');
 const sse = require('./sse');
 const webSocket = require('./socket');
+const checkAuction = require('./checkAuction');
 
 
 dotenv.config();
@@ -15,6 +16,7 @@ const indexRouter = require('./routes/index');
 const authRouter = require('./routes/auth');
 const { sequelize } = require('./models');
 const passportConfig = require('./passport');
+checkAuction();
 
 const app = express();
 passportConfig();
